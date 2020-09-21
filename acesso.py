@@ -20,13 +20,15 @@ mail.select("inbox")
 result, numbers = mail.uid('search', None, "ALL")
 uids = numbers[0].split()
 uids = [id.decode("utf-8") for id in uids ]
-uids = uids[-1:-101:-1]
+uids = uids[-1:-100:-1]
 result, messages = mail.uid('fetch', ','.join(uids), '(BODY[HEADER.FIELDS (SUBJECT FROM DATE)])')
 
-# Preparando dados antes da exportação
+# Criando lista de cada tipo de dados
 date_list = []
-from_list = [] 
+from_list = []
 subject_text = []
+
+# Rotina para extrair os dados de cada email no inbox
 for i, message in messages[::2]:
     msg = email.message_from_bytes(message)
     decode = email.header.decode_header(msg['Subject'])[0]
@@ -38,7 +40,9 @@ for i, message in messages[::2]:
     date_list.append(msg.get('date'))
     fromlist = msg.get('From')
     fromlist = fromlist.split("<")[0].replace('"', '')
+    from_list1 = []
     from_list1.append(fromlist)
+# Cria um DataFrame basedo na Data
 date_list = pd.to_datetime(date_list)
 date_list1 = []
 for item in date_list:
@@ -46,7 +50,8 @@ for item in date_list:
 print(len(subject_text))
 print(len(from_list))
 print(len(date_list1))
-df = pd.DataFrame(data={'Date':date_list1, 'Sender':from_list, 'Subject':subject_text})
-print(df.head())
-df.to_csv('inbox_email.csv',index=False)
+dados = {'Date':date_list1, 'Sender':from_list, 'Subject':subject_text}
+dados_texto = str(dados)
+f = open('lista de emails.txt','a')
+f.write(dados_texto)
 
